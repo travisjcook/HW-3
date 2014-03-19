@@ -1,0 +1,30 @@
+HW#3 - Travis Cook
+========================================================
+```{r}
+## Getting the data from GEO
+setwd("~/Data/GEO")
+gd <- getGEO("GSE45735", destdir = "Data/GEO/")
+pd <- pData(gd[[1]])
+
+## Getting the raw data
+getGEOSuppFiles("GSE45735", makeDirectory=FALSE, baseDir = "Data/GEO/")
+#Note: The T14 file is problematic; fix by hand
+#I unzipped all of the text files and deleted the bottom rows of the GSE45735_T14_pbmc.txt file to match the other text files, deleting everything below the gene IL9R.
+#I noted that there was still one more row in the T14 file, and found the extra row to be at line 11389 (gene = HBB). I deleted this row, so all files have 21967 lines. 
+
+## 
+files <- list.files(path = "Data/GEO/", pattern = "GSE45735_T*.txt", full.names = TRUE)
+file_list <- lapply(files, read.table, header=TRUE)
+
+file_list_unique <- lapply(file_list, function(x){x<-x[!duplicated(x$Gene),]; x <- x[order(x$Gene),]; rownames(x) <- x$Gene; x[,-1]})
+
+gene_list <- Reduce(intersect, lapply(file_list_unique, rownames))
+gene_list <- Reduce(intersect, lapply(file_list_unique, rownames))
+file_list_unique <- lapply(file_list_unique, "[", gene_list,)
+matrix <- as.matrix(do.call(cbind, file_list_unique))
+#Error in array(x, c(length(x), 1L), if (!is.null(names(x))) list(names(x), : 'data' must be of a vector type, was 'NULL'
+```
+ 
+ 
+ 
+ 
